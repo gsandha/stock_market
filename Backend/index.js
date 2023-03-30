@@ -2,17 +2,11 @@ const cors = require("cors");
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
-
+const db=require("./configs/db")
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 // Connect to MongoDB
-mongoose.connect(
-  "mongodb+srv://gsandha:gagangagan@cluster0.zhilydl.mongodb.net/stockmarket?retryWrites=true&w=majority",
-  { useNewUrlParser: true }
-);
-const db = mongoose.connection;
-db.on("error", console.error.bind(console, "MongoDB connection error:"));
 
 // Define schemas
 const pendingOrderSchema = new mongoose.Schema({
