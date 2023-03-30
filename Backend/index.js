@@ -1,28 +1,15 @@
 const cors = require("cors");
+const mongoose=require("mongoose")
 const express = require("express");
 const bodyParser = require("body-parser");
-const mongoose = require("mongoose");
+require("dotenv").config()
+const {PendingOrder,CompletedOrder}=require("./model/stock.model")
 const db=require("./configs/db")
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
-// Connect to MongoDB
 
-// Define schemas
-const pendingOrderSchema = new mongoose.Schema({
-  buyerQty: Number,
-  buyerPrice: Number,
-  sellerPrice: Number,
-  sellerQty: Number,
-});
-const completedOrderSchema = new mongoose.Schema({
-  price: Number,
-  qty: Number,
-});
 
-// Define models
-const PendingOrder = mongoose.model("PendingOrder", pendingOrderSchema);
-const CompletedOrder = mongoose.model("CompletedOrder", completedOrderSchema);
 // Get all pending orders
 app.get("/pendingOrders", async (req, res) => {
   try {
@@ -48,15 +35,16 @@ app.get("/completedOrders", async (req, res) => {
 // Place a new order
 app.post("/placeOrder", async (req, res) => {
   const { buyerQty, buyerPrice, sellerPrice, sellerQty } = req.body;
-  /////////////////////////////////////////////////////////////////////////////////
+
   try {
-    // Check if there is a matching order
+    // Check if there is a matching order based on Price or not
     const matchingOrder = await PendingOrder.findOne({
-      // buyerQty: sellerQty,
+     
       buyerPrice: sellerPrice,
       sellerPrice: buyerPrice,
-      // sellerQty: buyerQty
+
     });
+     // Check if there all the inputs of order are matching or not
     const fullymatchingOrder = await PendingOrder.findOne({
       buyerQty: sellerQty,
       buyerPrice: sellerPrice,
@@ -80,7 +68,7 @@ app.post("/placeOrder", async (req, res) => {
       // Create a new completed order
       const completedOrder = new CompletedOrder({
         price: buyerPrice || sellerPrice,
-        // qty: sellerQty||buyerQty
+
         qty: buyerQty || sellerQty,
       });
       await completedOrder.save();
@@ -123,7 +111,7 @@ app.post("/placeOrder", async (req, res) => {
   }
 });
 
-app.listen(3001, async () => {
+app.listen(process.env.PORT, async () => {
   try {
     await db;
     console.log("Database is connected");
